@@ -1,0 +1,8 @@
+[package]
+name = "brother-print"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-2.0-or-later"
+description = "Print to Brother DCP-1600 series lasers from macOS without a Brother driver (Rust port of brlaser's encoder)"
+
+[dependencies]
