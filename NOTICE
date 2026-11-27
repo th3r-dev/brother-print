@@ -1,0 +1,42 @@
+brother-print
+Copyright (C) 2026 the brother-print authors
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version. See LICENSE.
+
+It contains a Rust port of parts of brlaser, the CUPS driver for Brother
+laser printers by Peter De Wachter (https://github.com/pdewacht/brlaser,
+version 6, commit 2a49e3287c70c254e7e3ac9dabe9d6a07218c3fa), licensed
+GPL-2.0-or-later. Copyright 2013 Peter De Wachter.
+
+What was ported, and from where:
+
+  src/encode.rs
+    - brlaser src/line.cc: encode_line (with and without a reference line),
+      write_overflow, write_substitute, write_repeat, substitute_length,
+      repeat_length, the 254-edit cap and the 0xFF blank-line code.
+    - brlaser src/block.h: the block buffer, its 16350-byte limit and the
+      "<n>w\0<lines>" block header.
+    - brlaser src/job.cc: begin_job (128 NUL bytes, PJL JOB), end_job
+      (PJL EOJ, UEL), write_page_header (PJL RAS1200MODE, RESOLUTION,
+      ECONOMODE, SOURCETRAY, MEDIATYPE, PAPER, PAGEPROTECT, ORIENTATION,
+      ENTER LANGUAGE = PCL, ESC E, copies ESC&l<n>X, duplex ESC&l2S),
+      encode_page (64-line bands, ESC*b1030m ... 1030M FF), the job-name
+      character filter, and re-sending the page header only when the page
+      parameters change.
+    - brlaser src/main.cc: build_page_params (tray names, PPD page size
+      name to PJL PAPER mapping, cupsInteger10 economode) and
+      ascii_job_name.
+
+  src/raster.rs
+    - The 1-bit/1-colour/10000-byte-line checks from brlaser src/main.cc.
+      The raster parser itself is new code written from the CUPS raster
+      format description.
+
+  src/dcp1600.ppd
+    - Derived from the "DCP-1600 series" entry of brlaser brlaser.drv
+      (page sizes, 600 dpi K 1-bit resolution, PLAIN media type,
+      brlaserEconomode option), trimmed, with the imageable area set to the
+      full page so Apple's cgpdftoraster renders whole-page raster.
